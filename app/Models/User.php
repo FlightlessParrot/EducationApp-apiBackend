@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Notifications\ResetPasswordNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -53,5 +54,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function UserAdress():HasMany 
     {
         return $this->hasMany(UserAdress::class);
+    }
+
+    public function Tests():BelongsToMany
+    {
+        return $this->belongsToMany(Test::class);
+    }
+
+    public function generatedTests():HasMany
+    {
+        return $this->hasMany(GeneratedTest::class);
     }
 }

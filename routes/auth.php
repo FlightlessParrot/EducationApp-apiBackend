@@ -7,6 +7,8 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\CheckAuthController;
+use App\Http\Controllers\GeneratedTestController;
+use App\Models\GeneratedTest;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [RegisteredUserController::class, 'store'])
@@ -39,5 +41,7 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
 
 Route::get('/checkAuth', CheckAuthController::class)->middleware('auth');
+
+Route::post('/generate-test', [GeneratedTestController::class,'store'])->middleware('auth');
 
               

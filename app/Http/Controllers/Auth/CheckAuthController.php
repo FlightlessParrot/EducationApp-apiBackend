@@ -17,6 +17,6 @@ class CheckAuthController extends Controller
         $authenticated=Auth::user();
             
         return response()->noContent()->cookie(
-            'user-name',$authenticated->name,null,null,null,null, false)->cookie( 'user-id',$authenticated->id,null,null,null,null, false);
+            'user-name',$authenticated->name,null,null,null,null, false)->cookie( 'user-id',$authenticated->id,null,null,null,null, false)->cookie( 'role',$authenticated->role,null,null,null,null, false);
     }
 }

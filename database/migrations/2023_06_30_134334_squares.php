@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Question;
+use App\Models\Square;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,12 +13,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tests', function (Blueprint $table) {
+        Schema::create('squares', function (Blueprint $table){
             $table->id();
             $table->timestamps();
-           $table->string('name');
-           $table->string('path')->nullable();
-           $table->boolean('custom')->default(false);
+            $table->foreignIdFor(Question::class);
+            $table->string('text');
+            $table->foreignId('brother')->nullable();
+            $table->integer('order',false, true)->nullable();
+
         });
     }
 
@@ -25,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tests');
+        Schema::dropIfExists('squares');
     }
 };

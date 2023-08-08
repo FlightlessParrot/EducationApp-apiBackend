@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CustomQuestion;
 use App\Models\GeneratedTest;
 use App\Models\Question;
 use Illuminate\Database\Migrations\Migration;
@@ -14,9 +15,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('generated_questions', function(Blueprint $table){
+            $table->id();
             $table->foreignIdFor(GeneratedTest::class);
             $table->foreignIdFor(Question::class);
-
+            $table->timestamps();
+            $table->boolean('answer')->nullable();
+       
         });
     }
 
@@ -25,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('generated_questions');
     }
 };

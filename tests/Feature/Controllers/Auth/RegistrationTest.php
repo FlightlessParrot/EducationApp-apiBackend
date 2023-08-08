@@ -3,9 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Notification;
+
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase

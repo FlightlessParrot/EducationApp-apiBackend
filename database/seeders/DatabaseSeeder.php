@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Category;
+use App\Models\Undercategory;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -22,6 +25,9 @@ class DatabaseSeeder extends Seeder
         
         $this->call([
              UserSeeder::class,
-            TestSeeder::class]);
+            TestSeeder::class,
+            TeamSeeder::class,
+            CategorySeeder::class,
+            ]);
     }
 }

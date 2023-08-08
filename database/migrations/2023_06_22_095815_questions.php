@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Category;
 use App\Models\Test;
+use App\Models\Undercategory;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,13 +16,13 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Test::class);
             $table->timestamps();
             $table->string('type');
-            $table->string('category')->nullable();
-            $table->string('subcategory')->nullable();
-           $table->string('question');
+            $table->foreignIdFor(Category::class)->nullable();
+            $table->foreignIdFor(Undercategory::class)->nullable();
+           $table->text('question');
            $table->string('path')->nullable();
+           $table->boolean('custom')->default(false);
 
         });
     }

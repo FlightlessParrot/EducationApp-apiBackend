@@ -12,15 +12,28 @@ class Test extends Model
 {
     use HasFactory;
 
-    public function Question(): HasMany
+    protected $fillable=[
+        'name', 'custom'
+    ];
+    public function questions(): BelongsToMany
     {
-        return $this->hasMany(Question::class);
+        return $this->belongsToMany(Question::class);
 
     }
 
-    public function Users():BelongsToMany
+    public function users():BelongsToMany
     {
         return $this->belongsToMany(User::class);
+    }
+
+    public function generatedTests():HasMany
+    {
+        return $this->hasMany(GeneratedTest::class);
+    }
+
+    public function teams():BelongsToMany
+    {
+        return $this->belongsToMany(Test::class);
     }
 
 }

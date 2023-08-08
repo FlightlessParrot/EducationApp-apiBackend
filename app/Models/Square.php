@@ -4,17 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Answer extends Model
+class Square extends Model
 {
     use HasFactory;
 
-    protected $hidden=[
-      //  'correct'
+    protected $fillable=[
+        'brother', 'question_id', 'order', 'name'
     ];
-    public function question():BelongsTo
+    protected $hidden=[
+    //    'order', 'brother'
+    ];
+    public function question()
     {
         return $this->belongsTo(Question::class);
     }
+
 }

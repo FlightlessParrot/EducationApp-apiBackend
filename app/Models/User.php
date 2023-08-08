@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -56,7 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserAdress::class);
     }
 
-    public function Tests():BelongsToMany
+    public function tests():BelongsToMany
     {
         return $this->belongsToMany(Test::class);
     }
@@ -65,4 +66,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(GeneratedTest::class);
     }
+ 
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class)->withPivot('created_at','updated_at','is_teacher');
+    }
+   
 }

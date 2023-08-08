@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\CustomTest;
+use App\Models\Test;
+use App\Policies\CustomTestPolicy;
+use App\Policies\TestPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -16,6 +20,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        CustomTest::class => CustomTestPolicy::class,
+        Test::class => TestPolicy::class,
+        
     ];
 
     /**

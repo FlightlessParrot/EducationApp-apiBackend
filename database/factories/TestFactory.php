@@ -17,8 +17,8 @@ class TestFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'=>fake()->sentence()
-            
+            'name'=>fake()->sentence(),
+            'path'=>'/images/out.jpg'
         ];
     }
 }

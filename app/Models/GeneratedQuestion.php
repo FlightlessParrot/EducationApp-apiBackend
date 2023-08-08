@@ -9,13 +9,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class GeneratedQuestion extends Model
 {
     use HasFactory;
-
-    public function GeneratedTest():BelongsTo
+    protected $fillable=['question_id', 'answer'];
+    public function generatedTest():BelongsTo
     {
         return $this->belongsTo(GeneratedTest::class);
     }
 
-    public function Question(): BelongsTo
+    public function question(): BelongsTo
     {
         return $this->belongsTo(Question::class);
     }

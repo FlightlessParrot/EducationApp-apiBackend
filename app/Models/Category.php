@@ -18,4 +18,9 @@ class Category extends Model
     {
         return $this->hasMany(Question::class);
     }
+
+    function flashcards() : HasMany
+    {
+        return $this->hasMany(Flashcard::class);
+    }
 }

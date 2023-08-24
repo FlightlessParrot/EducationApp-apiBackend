@@ -16,7 +16,8 @@ class GeneratedTest extends Model
             'test_id',
             'custom_test_id',
             'questions_number',
-            'duration'
+            'duration',
+            'gandalf'
             
     ];
     public function generatedQuestions():HasMany

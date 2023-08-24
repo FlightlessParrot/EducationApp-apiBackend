@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Events\OpenAnswersWritten;
 use App\Models\GeneratedQuestion;
 use App\Models\GeneratedTest;
 use App\Models\Square;
+use App\Models\Undercategory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,14 +37,15 @@ class GeneratedTestController extends Controller
         $allAnswers= $generatedTest->generatedQuestions()->get();
         $correctAnswers=$generatedTest->generatedQuestions()->where('answer', true)->get();
         $wrongAnswers=$generatedTest->generatedQuestions()->where('answer',false)->get();
-        $nonAnswers=$generatedTest->generatedQuestions()->whereNull('answerr');
+        $nonAnswers=$generatedTest->generatedQuestions()->whereNull('answer');
         $ojojAnswer=$wrongAnswers->merge($nonAnswers)->unique();
+        $pass=(count($correctAnswers)/count($allAnswers))*100>$generatedTest->gandalf;
         $responseData=[
             'generatedTest'=>$generatedTest,
             'correctAnswers'=>$correctAnswers,
             'wrongAnswers'=>$ojojAnswer,
-            'allAnswers'=>$allAnswers
-
+            'allAnswers'=>$allAnswers,
+            'pass'=>$pass
         ];
         return $responseData;
 
@@ -53,37 +55,41 @@ class GeneratedTestController extends Controller
      */
     public function store(Request $request) :Response
     {
-        $request->validate([
-            'test_id' => 'required'
-        ]);
+       
         $user = Auth::user();
-        $questionsNumber = $request->questionsNumber ?: 10;
-        $testId = $request->input('test_id');
-        $category=$request->input('category');
-        $undercategory=$request->input('undercategory');
+        $questionsNumber = $request->input('questionsNumber') ?: 10;
+        $testId = $request->input('test_id') ? $request->input('test_id') : null;
+        $categories=$request->input('categories');
+        $undercategories=$request->input('undercategories');
+        $gandalf=$request->input('gandalf');
         $test = $user->tests()->findOrFail($testId);
         $input=$request->all();
         $questions= new Collection();
+        $questionsByTypes=new Collection();
         foreach($input as $key => $value)
         {
             if($key!=='categories' && $key!=='undercategories')
             {
             $chosenQuestions=$test->questions()->where('type', $value)->get();
-            $questions=$questions->merge($chosenQuestions);
+            $questionsByTypes=$questionsByTypes->merge($chosenQuestions);
             }
+        }
+
+        if($categories || $undercategories )
+        {  
+            foreach($categories as $category)
+            $questions=$questions->merge($questionsByTypes->where('category_id',$category));
             
 
-        }
-
-        if($category)
+            foreach($undercategories as $undercategory)
             {
-            $questions=$questions->where('category_id',$category);
+            $questions=$questions->merge($questionsByTypes->where('undercategory_id',$undercategory));
             }
-
-        if($undercategory)
-        {
-            $questions=$questions->where('undercategory_id',$undercategory);
+            $questions=$questions->unique();
+        }else{
+            $questions=$questionsByTypes;
         }
+        
         if(count($questions)>$questionsNumber)
         {
         $questions=$questions->random($questionsNumber);
@@ -93,6 +99,7 @@ class GeneratedTestController extends Controller
             'time' => $request->time,
             'test_id' => $testId,
             'questions_number' => $questionsNumber,
+            'gandalf'=>$gandalf
         ]);
         
         foreach ($questions as $question) {
@@ -110,17 +117,19 @@ class GeneratedTestController extends Controller
     {
        $this->authorize('view', $generatedTest);
          $test= Array();
+        
         foreach ($generatedTest->generatedQuestions as $generatedQuestion)
         {
             $question=$generatedQuestion->question()->first();
             $position=[
                 
                 'question'=>$question,
-                'answers'=>$question->answers()->get(),
-                'squares'=>$question->squares()->get()  
+                'answers'=>$question->answers()->inRandomOrder()->get(),
+                'squares'=>$question->squares()->inRandomOrder()->get()  
             ];
             array_push($test, $position);
         }
+        shuffle($test);
         return ['generatedTest'=>$generatedTest, 'test'=>$generatedTest->test()->first(),'qas'=>$test];
     }
 
@@ -137,10 +146,13 @@ class GeneratedTestController extends Controller
      */
     public function update(Request $request, GeneratedTest $generatedTest)
     { 
-  
+        //Pokrycie testem ekonomicznie niezasadne
         
         $this->authorize('update', $generatedTest);
-
+        if($generatedTest->solved)
+        {
+           return response('Generated test has been solved already.',403);
+        }
         $generatedTest->duration = $request->input('additionalData.time');
         $generatedTest->save();
         $generatedQuestions = $generatedTest->generatedQuestions()->get();
@@ -194,27 +206,49 @@ class GeneratedTestController extends Controller
                         }
                     }
                     break;
-            }
-           
-           
+                case 'open':
+                    $correct=false;
+                    $generatedQuestion->openAnswer()->create(['answer'=>$questionWithAnswer]);
+                    $test=$generatedTest->test()->first();
+                    OpenAnswersWritten::dispatch($test);
+                    break;
+
+            } 
            $generatedQuestion->answer=$correct;
            $generatedQuestion->save();
-
-            
-
+           
         }
-
-   
+        $generatedTest->solved=true;
+           $generatedTest->save();
        return response()->noContent();
-
-        
     }
 
+    public function getCorrectAnswerData(GeneratedTest $generatedTest)
+    {
+        $generatedQuestions=$generatedTest->generatedQuestions()->get();
+        $correct=[];
+        foreach($generatedQuestions as $generatedQuestion)
+        {
+            if(!$generatedQuestion->openAnswer()->first())
+            {
+            $question=$generatedQuestion->question()->first();
+            $correct[$question->id]=$generatedQuestion->answer;
+            }
+        }
+        return response(['correct'=>$correct],200);
+    }
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(GeneratedTest $generatedTest)
     {
-        //
+        $this->authorize('delete', $generatedTest);
+        foreach($generatedTest->generatedQuestions as $generatedQuestion)
+        {
+            $generatedQuestion->delete();
+        }
+        $generatedTest->delete();
+
+        return response()->noContent();
     }
 }

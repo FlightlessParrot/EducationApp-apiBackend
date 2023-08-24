@@ -7,13 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Test extends Model
 {
     use HasFactory;
 
     protected $fillable=[
-        'name', 'custom'
+        'name', 'role', 'fillable', 'maximum_time', 'path', 'gandalf'
     ];
     public function questions(): BelongsToMany
     {
@@ -33,7 +35,12 @@ class Test extends Model
 
     public function teams():BelongsToMany
     {
-        return $this->belongsToMany(Test::class);
+        return $this->belongsToMany(Team::class);
+    }
+
+    public function notyfications():MorphMany
+    {
+        return $this->morphMany(Notyfication::class, "notyficationable");
     }
 
 }

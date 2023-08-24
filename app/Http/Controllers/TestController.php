@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GeneratedTest;
 use App\Models\Question;
+use App\Models\Team;
 use App\Models\Test;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -21,7 +23,7 @@ class TestController extends Controller
         ]); 
         $user=Auth::user();
        
-        $test=$user->tests()->create(['name'=>$request->name, 'custom'=>true]);
+        $test=$user->tests()->create(['name'=>$request->name, 'role'=>'custom']);
         if($request->test_id)
         {
           foreach($user->tests()->find($request->test_id)->questions as $question)
@@ -31,8 +33,7 @@ class TestController extends Controller
         }
         return response()->noContent();
     }
- 
-   
+
     
     public function removeAllQuestions(Test $test)
     {
@@ -60,8 +61,17 @@ class TestController extends Controller
     public function find(Request $request)
     {
         $request->validate(['search'=>'nullable|max:250']);
-        $tests=Auth::user()->tests()->where('name','like','%'.$request->search.'%')->where('custom', $request->custom==='true' )->get();
-        return $tests;
+        $tests=Auth::user()->tests()->where('name','like','%'.$request->search.'%')->where('role', $request->input('custom')==='true' ? 'custom': 'general' )->get();
+        if($request->input('custom')==='false')
+        {
+            foreach(Auth::user()->teams as $team)
+            {
+                $teamTests=$team->tests()->where('role','!=','egzam')->where('name','like','%'.$request->search.'%')->get();
+                $tests=$tests->merge($teamTests);
+            }
+            
+        }
+        return response($tests);
     }
    
 }

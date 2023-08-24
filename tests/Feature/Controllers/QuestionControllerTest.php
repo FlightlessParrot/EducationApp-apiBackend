@@ -7,6 +7,8 @@ use App\Models\Test;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class QuestionControllerTest extends TestCase
@@ -20,7 +22,7 @@ class QuestionControllerTest extends TestCase
        $this->seed();
        $user=User::has('tests')->first();
        $question=$user->tests()->first()->questions()->first();
-       $test=Test::factory()->create(['custom'=>true]);
+       $test=Test::factory()->create(['role'=>'custom']);
        $user->tests()->attach($test);
 
        $response=$this->actingAs($user)->post('/tests/'.$test->id.'/questions/'.$question->id.'/attach');
@@ -33,7 +35,7 @@ class QuestionControllerTest extends TestCase
     {
        $this->seed();
        $user=User::has('tests')->first();
-       $test=$user->tests()->where('custom',true)->first();
+       $test=$user->tests()->where('role','custom')->first();
        $question=$test->questions()->first();
        $answer=$question->answers()->first();
        $question->custom=true;
@@ -51,7 +53,7 @@ class QuestionControllerTest extends TestCase
     {
        $this->seed();
        $user=User::has('tests')->first();
-       $test=$user->tests()->where('custom',true)->first();
+       $test=$user->tests()->where('role','custom')->first();
        $question=$test->questions()->first();
        $question->custom=false;
        $question->save();
@@ -69,7 +71,7 @@ class QuestionControllerTest extends TestCase
       $this->seed();
       $user=User::has('tests')->first();
       $question=$user->tests()->first()->questions()->firstOrFail();
-      $response=$this->actingAs($user)->post('/questions/find',['search'=>$question->question]);
+      $response=$this->actingAs($user)->post('/questions/find',['search'=>substr($question->question,0,250)]);
       $response->assertSuccessful();
       $response->assertJsonPath('0.question', $question->question);
 
@@ -81,7 +83,7 @@ class QuestionControllerTest extends TestCase
       $user=User::has('tests')->first();
       $test=$user->tests()->first();
       $question=$test->questions()->firstOrFail();
-      $response=$this->actingAs($user)->post('/tests/'.$test->id.'/questions/owned',['search'=>$question->question]);
+      $response=$this->actingAs($user)->post('/tests/'.$test->id.'/questions/owned',['search'=>substr($question->question,0,250)]);
       $response->assertSuccessful();
       $response->assertJsonPath('0.question', $question->question);
     }
@@ -95,9 +97,26 @@ class QuestionControllerTest extends TestCase
       $otherTest=Test::factory()->has(Question::factory()->state(['question'=>$question->question]))->create();
       $otherTest->users()->attach($user->id);
       
-      $response=$this->actingAs($user)->post('/tests/'.$otherTest->id.'/questions/unowned',['search'=>$question->question]);
+      $response=$this->actingAs($user)->post('/tests/'.$otherTest->id.'/questions/unowned',['search'=>substr($question->question,0,250)]);
       $response->assertSuccessful();
       $response->assertJsonPath('0.question', $question->question)->assertJsonCount(1);
       
+    }
+
+    public function test_user_can_create_egzam_question()
+    {
+      $this->seed();
+      $user=User::where('email','test@example.com')->firstOrFail();
+      $file=UploadedFile::fake()->image('image.webp');
+      $team=$user->teams()->has('tests')->firstOrFail();
+      $egzam=$team->tests()->where('role','egzam')->firstOrFail();
+
+      $response=$this->actingAs($user)->post('/teams/'.$team->id.'/egzams/'.$egzam->id.'/question/create',['question'=>'question?','type'=>'open','image'=>$file]);
+      $question=Question::where('question','question?')->where('type','open')->first();
+
+      $response->assertOk();
+      
+      Storage::assertExists($response['question']['path']);
+      $this->assertModelExists($question);
     }
 }

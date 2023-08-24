@@ -68,7 +68,7 @@ class TestSeeder extends Seeder
          $question->tests()->attach($test);
          }
         //Second test - custom
-        $customTest=Test::factory()->create(['name' =>'Test Test', 'custom'=>true]);
+        $customTest=Test::factory()->create(['name' =>'Custom Test', 'role'=>'custom']);
        for($i=0;$i<200;$i++)
        {
         $question=\App\Models\Question::factory()->create(['custom'=>true]);

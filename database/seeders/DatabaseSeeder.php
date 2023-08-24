@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             TestSeeder::class,
             TeamSeeder::class,
             CategorySeeder::class,
+            NotyficationSeeder::class,
+            FlashcardsSeeder::class
             ]);
     }
 }

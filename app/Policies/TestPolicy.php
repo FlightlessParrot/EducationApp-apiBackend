@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Team;
 use App\Models\Test;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -21,7 +22,17 @@ class TestPolicy
      */
     public function view(User $user, Test $test): bool
     {
-        return $test->users()->find($user->id)!=null;
+        $bolleanValue=$test->users()->find($user->id)!=null;
+            foreach($user->teams as $team)
+            {
+               $findTest= $team->tests()->find($test->id);
+               if($findTest!=null)
+               {
+                $bolleanValue=true;
+               }
+            }
+        return $bolleanValue;
+
     }
 
     /**
@@ -38,17 +49,40 @@ class TestPolicy
     public function update(User $user, Test $test): bool
     {
         
-        return $test->users()->find($user->id)!=null && $test->custom;
+        return $test->users()->find($user->id)!=null && $test->role==='custom';
     }
+    public function updateEgzam(User $user, Test $test, Team $team): bool
+    {
 
+        $belongsToTeamRule=$test->teams()->find($team->id)!=null;
+
+        $egzamRule=$test->role==='egzam';
+
+        $teacherRule=$team->users()->wherePivot('is_teacher', true)->where('id',$user->id)->first()!=null;
+      
+        return $belongsToTeamRule && $egzamRule && $teacherRule;
+
+    }
     /**
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Test $test): bool
     {
-        return $test->users()->find($user->id)!=null && $test->custom;
+        return $test->users()->find($user->id)!=null && $test->role==='custom';
     }
 
+    public function deleteEgzam(User $user, Test $test, Team $team): bool
+    {
+
+        $belongsToTeamRule=$test->teams()->find($team->id)!=null;
+
+        $egzamRule=$test->role==='egzam';
+
+        $teacherRule=$team->users()->wherePivot('is_teacher', true)->where('id',$user->id)->first()!=null;
+      
+        return $belongsToTeamRule && $egzamRule && $teacherRule;
+
+    }
     /**
      * Determine whether the user can restore the model.
      */

@@ -11,18 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('undercategories', function (Blueprint $table) {
+        Schema::create('flashcards', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('name')->unique();
+            $table->string('question');
+            $table->string('path');
+            $table->string('answer');
+            $table->integer('flashcardable_id');
+            $table->string('flashcardable_type');
         });
     }
 
-    /** 
+    /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('undercategories');
+        Schema::dropIfExists('flashcards');
     }
 };

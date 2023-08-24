@@ -42,7 +42,7 @@ class TeamPolicy
      */
     public function update(User $user, Team $team): bool
     {
-        //
+        return  $team->users()->wherePivot('is_teacher', true)->find($user->id)!=null;
     }
 
     /**

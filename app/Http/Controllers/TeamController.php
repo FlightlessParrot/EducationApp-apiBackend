@@ -109,7 +109,7 @@ class TeamController extends Controller
     {
 
         $this->authorize('view', $team);
-        return $team->tests()->get();
+        return $team->tests()->where('role','!=','egzam')->get();
     }
     public function destroy(Team $team)
     {

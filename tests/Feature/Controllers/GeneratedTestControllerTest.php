@@ -29,7 +29,7 @@ class GeneratedTestControllerTest extends TestCase
         $this->seed();
     
         $user=User::where('email','test@example.com')->first();
-        $test=$user->tests()->where('custom',false)->firstOrFail();
+        $test=$user->tests()->where('role','custom')->firstOrFail();
         
         $response = $this->actingAs($user)->postJson('/generate-test',[...$this->data,'test_id'=>$test->id,]);
    
@@ -113,5 +113,28 @@ class GeneratedTestControllerTest extends TestCase
 
         $response->assertSuccessful()->assertJsonCount($generatedTest->questions_number,'qas');
     }
+    public function test_user_can_get_answers_data()
+    {
+        $this->seed();
     
+        $user=User::where('email','test@example.com')->first();
+        $generatedTest=$user->generatedTests()->firstOrFail();
+
+        $response=$this->actingAs($user)->get('/generated-tests/'.$generatedTest->id.'/answers');
+        
+        $response->assertSuccessful()->assertJsonIsObject('correct')->assertJsonCount($generatedTest->questions_number,'correct');
+    }
+    public function test_user_can_get_delete_generated_test()
+    {
+        $this->seed();
+    
+        $user=User::where('email','test@example.com')->first();
+        $generatedTest=$user->generatedTests()->firstOrFail();
+
+        $response=$this->actingAs($user)->delete('/generated-tests/'.$generatedTest->id);
+
+        $response->assertNoContent();
+        $this->assertModelMissing($generatedTest);
+    }
+
 }

@@ -2,12 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\GeneratedTest;
 use App\Models\User;
-use Error;
+use App\Models\UserAdress;
 use Illuminate\Auth\Access\Response;
 
-class GeneratedTestPolicy
+class UserAdressPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -20,9 +19,9 @@ class GeneratedTestPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, GeneratedTest $generatedTest): bool
+    public function view(User $user, UserAdress $userAdress): bool
     {
-       return $user->generatedTests()->find($generatedTest->id)!=null;
+        //
     }
 
     /**
@@ -36,23 +35,23 @@ class GeneratedTestPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, GeneratedTest $generatedTest): bool
+    public function update(User $user, UserAdress $userAdress): bool
     {
-        return $user->generatedTests()->find($generatedTest->id)!=null && !$generatedTest->solved;
+       return $userAdress->user()->find($user->id)!=null;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, GeneratedTest $generatedTest): bool
+    public function delete(User $user, UserAdress $userAdress): bool
     {
-        return $user->generatedTests()->find($generatedTest->id)!=null && $generatedTest->test()->first()->role!=='egzam';
+        //
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, GeneratedTest $generatedTest): bool
+    public function restore(User $user, UserAdress $userAdress): bool
     {
         //
     }
@@ -60,7 +59,7 @@ class GeneratedTestPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, GeneratedTest $generatedTest): bool
+    public function forceDelete(User $user, UserAdress $userAdress): bool
     {
         //
     }

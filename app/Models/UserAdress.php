@@ -13,8 +13,10 @@ class UserAdress extends Model
         'adress',
         'city',
         'postal_code',
+        'user_id',
+        'nip'
     ];
-    public function User() :BelongsTo
+    public function user() :BelongsTo
     {
         return $this->belongsTo(User::class);
     }

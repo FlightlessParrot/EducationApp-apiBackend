@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(Question::class);
             $table->timestamps();
             $table->boolean('answer')->nullable();
-       
+            $table->boolean('relevant')->default(true);
         });
     }
 

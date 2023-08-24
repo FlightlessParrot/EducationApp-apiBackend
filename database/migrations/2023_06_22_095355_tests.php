@@ -16,7 +16,10 @@ return new class extends Migration
             $table->timestamps();
            $table->string('name');
            $table->string('path')->nullable();
-           $table->boolean('custom')->default(false);
+           $table->enum('role',['general','custom','egzam'])->default('general');
+           $table->boolean('fillable')->default(true);
+           $table->time('maximum_time')->nullable();
+           $table->integer('gandalf',false,true)->default(50);
         });
     }
 

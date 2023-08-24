@@ -47,7 +47,7 @@ class QuestionPolicy
     }
     public function detach(User $user, Question $question):bool
     {
-        $test= $question->tests()->where('custom',true)->whereRelation('users', 'id', $user->id)->first();
+        $test= $question->tests()->where('role','custom')->whereRelation('users', 'id', $user->id)->first();
         return $test!=null;
     }
     /**

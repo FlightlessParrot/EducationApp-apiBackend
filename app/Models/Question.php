@@ -12,7 +12,7 @@ class Question extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'name', 'custom','category_id', 'undercategory_id'
+        'question', 'custom','category_id', 'undercategory_id','type','path'
     ];
     public function tests() :BelongsToMany
     {
@@ -26,6 +26,7 @@ class Question extends Model
     {
         return $this->hasMany(Square::class);
     }
+    
     public function generatedQuestions() :HasMany
     {
         return $this->hasMany(GeneratedQuestion::class);

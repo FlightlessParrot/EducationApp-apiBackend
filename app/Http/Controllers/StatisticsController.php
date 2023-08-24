@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Question;
+use App\Models\Team;
 use App\Models\Test;
 use App\TimeManagers\Timer;
 use DateTime;
@@ -15,11 +16,60 @@ use Illuminate\Support\Facades\Auth;
 
 class StatisticsController extends Controller
 {
-    
+    public function showTeamResults(Team $team,  Test $test)
+    {
+        $this->authorize('modify',$team);
+        $results=[];
+        foreach($team->users as $user)
+        {
+            $generatedEgzam=$test->generatedTests()->where('user_id',$user->id)->first();
+            if($user->pivot->is_teacher || !$generatedEgzam )
+            {
+                continue;
+            }
+            else {
+              
+            $results[$user->id]=['id'=>null,'name'=>null,'resultsInPercent'=>0,'correctAnswers'=>0];
+
+                if(!$generatedEgzam)
+                {
+                    continue;
+                }else{
+                    $allAnswers=0;
+                    $correctAnswers=0;
+                    $nextUser=false;
+                   foreach($generatedEgzam->generatedQuestions as $generatedQuestion)
+                   {
+                    if($generatedQuestion->relevant)
+                    {
+                        $allAnswers++;
+                        if($generatedQuestion->answer)
+                        {
+                            $correctAnswers++;
+                        }
+                    }else{
+                          $nextUser=true;
+                        }
+                   }
+                   if($nextUser){
+                     unset($results[$user->id]);
+                     continue;
+                   }
+                   $results[$user->id]['resultsInPercent']=(string)floor(($correctAnswers*100/$allAnswers)).'%';
+                   $results[$user->id]['correctAnswers']=$correctAnswers;
+                   $results[$user->id]['name']=$user->name;
+                   $results[$user->id]['id']=$user->id;
+                }
+             } 
+            
+        }
+        return response(['results'=>array_values($results),'headers'=>['id'=>'id','name'=>'Imię i nazwisko','resultsInPercent'=> 'Wynik w procentach',  'correctAnswers'=>'Liczba poprawnych odpowiedzi', ]]);
+    }
     public function showGeneralStatistic()
     {
         $user=Auth::user();
         $tests=$user->tests()->get();
+
         //how many % of all answers has correct answer
         
         $allQuestions=new Collection();
@@ -44,7 +94,6 @@ class StatisticsController extends Controller
         $generatedTests=$user->generatedTests()->get();
         foreach($generatedTests as $generatedTest)
         {
-            error_log($generatedTest->egzam);
             if($generatedTest->duration==null || !$generatedTest->egzam)
             {
                 continue;
@@ -63,9 +112,8 @@ class StatisticsController extends Controller
         $averageTime=$averageTime===null ? 0: $averageTime;
         $result=ceil($result);
         return response(['average'=>$averageTime, 'result'=>$result]);
-
-
     }
+
     public function showTestStatistic(Request $request, Test $test)
     {
         $request->validate([
@@ -77,14 +125,14 @@ class StatisticsController extends Controller
         
         $date->modify($request->input('howOld'));
 
-        $generatedTests=$test->generatedTests()->where('updated_at','>',$date)->get();
+        $generatedTests=$test->generatedTests()->where('updated_at','>',$date)->where('user_id',Auth::user()->id)->get();
 
             $avgTimeArray=new Collection();
             $resultArray=new Collection();
         foreach($generatedTests as $generatedTest)
         {
-            $all=count($generatedTest->generatedQuestions()->get());
-            $correct=count($generatedTest->generatedQuestions()->where('answer',true)->get());
+            $all=count($generatedTest->generatedQuestions()->where('relevant',true)->get());
+            $correct=count($generatedTest->generatedQuestions()->where('relevant',true)->where('answer',true)->get());
             $timeObject=new DateTime($generatedTest->updated_at);
             $time=$timeObject->format('d-m-Y H:i:s');
             
@@ -137,8 +185,5 @@ class StatisticsController extends Controller
             }
         }
         return response(['summary'=>round(($goodAnswers/$allAnswers)*100), 'all'=>$answersCollection]);
-
-
-
     }
 }

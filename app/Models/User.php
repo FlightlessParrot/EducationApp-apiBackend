@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -25,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'role'
     ];
 
     /**
@@ -35,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+       
     ];
 
     /**
@@ -52,9 +56,9 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new ResetPasswordNotification($token));
     }
 
-    public function UserAdress():HasMany 
+    public function userAdress(): HasOne
     {
-        return $this->hasMany(UserAdress::class);
+        return $this->hasOne(UserAdress::class);
     }
 
     public function tests():BelongsToMany
@@ -71,5 +75,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(Team::class)->withPivot('created_at','updated_at','is_teacher');
     }
-   
+
+    public function notyfications():HasMany
+    {
+        return $this->hasMany(Notyfication::class);
+    }
+    public function flashcards():MorphMany
+    {
+        return $this->morphMany(Flashcard::class, 'flashcardable');
+    }
 }

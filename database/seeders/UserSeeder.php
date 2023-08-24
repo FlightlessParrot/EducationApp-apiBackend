@@ -21,5 +21,8 @@ class UserSeeder extends Seeder
            'password'=>Hash::make('TestPassword'),
            'role'=>'premium'
         ]);
+
+     \App\Models\User::factory()->create(['email'=> 'user@example.com', 'password'=>Hash::make('TestPassword')]);
     }
+    
 }

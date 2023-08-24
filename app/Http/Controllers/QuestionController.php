@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Question;
+use App\Models\Team;
 use App\Models\Test;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -22,9 +23,31 @@ class QuestionController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function createEgzamQuestion(Request $request,Team $team, Test $test)
     {
-        //
+        $this->authorize('updateEgzam',[$test, $team]);
+       $request->validate([
+        'question'=>'required|max:250',
+        'type'=>'required',
+        'photo'=>'nullable|mimes:jpg,webp,png'
+       ]);
+       $data=$request->all();
+       $data['custom']=true;
+       $question=$test->questions()->create($data);
+       if ($request->hasFile('image')) {
+        $path=$request->image->store('public/images/questions');
+        $question->path=$path;
+        $question->save();
+
+        }
+        
+       return response(['questionId'=>$question->id,'question'=>$question]);
+       
+    }
+    public function addPathtoEgzamQuestion(Request $request, Team $team, Test $test, Question $question)
+    {
+        $this->authorize('updateEgzam',[$test, $team]);
+        
     }
 
     /**

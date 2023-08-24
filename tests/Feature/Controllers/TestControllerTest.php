@@ -16,10 +16,11 @@ class TestControllerTest extends TestCase
      * A basic feature test example.
      */
     use RefreshDatabase;
-    public function test_if_user_can_find_test(): void
+    public function test_user_can_find_test(): void
     {
-        $user=User::factory()->has(Test::factory()->state(['name'=>'123 Test 123']))->create();
-        $response = $this->actingAs($user)->post('/tests/find',['search'=>'Test','custom'=>false]);
+        $user=User::factory()->has(Test::factory()->state(['name'=>'123 Test 123','role'=>'custom']))->create();
+        
+        $response = $this->actingAs($user)->post('/tests/find',['search'=>'Test','custom'=>'true']);
 
         $response->assertStatus(200);
         $response->assertJsonIsArray();
@@ -64,8 +65,7 @@ class TestControllerTest extends TestCase
     
     public function test_user_can_delete_custom_test()
     {
-        $test=Test::factory()->has(User::factory())->create(['custom'=>true]);
-        
+        $test=Test::factory()->has(User::factory())->create(['role'=>'custom']);
         $response=$this->actingAs($test->users()->firstOrFail())->delete('/tests/'.$test->id."/delete");
         $response->assertNoContent();
         $this->assertModelMissing($test);
@@ -74,7 +74,7 @@ class TestControllerTest extends TestCase
     public function test_user_can_remove_all_questions()
     {
         $this->seed();
-        $test=Test::where('custom', true)->firstOrFail();
+        $test=Test::where('role','custom')->firstOrFail();
         $user=$test->users()->first();
         $response=$this->actingAs($user)->delete('/tests/'.$test->id.'/questions/remove');
         

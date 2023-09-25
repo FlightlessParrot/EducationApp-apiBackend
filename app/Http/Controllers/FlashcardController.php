@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Flashcard;
+use App\Models\Subscription;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class FlashcardController extends Controller
 {
@@ -19,7 +23,12 @@ class FlashcardController extends Controller
         $undercategories=$request->input('undercategories');
         $limit=(int)$request->input('limit');
         $limitNumber=$limit ? $limit : 10;
-        $flashcards=$user->flashcards()->get();
+        $flashcards=new Collection();
+        foreach($user->subscriptions as $subscription)
+        {
+            $flashcards=$flashcards->merge($subscription->flashcards()->get());
+        }
+     
         $chosenFlashcards=new Collection();
        
         
@@ -49,22 +58,52 @@ class FlashcardController extends Controller
 
     }
 
+    public function find(Request $request, Subscription $subscription)
+    {
+        $search=$request->input('search');
+        $flashcards=$subscription->flashcards()->where(function(Builder $querry) use ($search) {
+            return $querry->where('question','like','%'.$search.'%')->orWhere('answer','like','%'.$search.'%');
+        })->get();
+        return response(['flashcards'=>$flashcards]);   
+    }
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        //
+            
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Subscription $subscription)
     {
-        //
+        $request->validate([
+            'question'=>'required|max:250',
+            'answer'=>'required|max:10000',
+            'category_id'=>'integer',
+            'undercategory_id'=>'integer'
+        ]);
+        $all=$request->all();
+        $flashcard=$subscription->flashcards()->create($all);
+
+        return response(['flashcard'=>$flashcard]);
     }
 
+
+    public function addImage(Request $request,Flashcard $flashcard)
+    {
+        $request->validate([
+            'image'=>'image',
+           
+        ]);
+        $path=$request->image->store('public/images/flashcards');
+        $flashcard->path=Storage::url($path);
+        $flashcard->save();
+
+        return response(['image'=>$flashcard->path]);
+    }
     /**
      * Display the specified resource.
      */
@@ -94,6 +133,11 @@ class FlashcardController extends Controller
      */
     public function destroy(Flashcard $flashcard)
     {
-        //
+        $bool=$flashcard->delete();
+        if(!$bool)
+        {
+            return response('Nie udało się usunąć elementu',500);
+        }
+        return response(['flashcard'=>$flashcard]);
     }
 }

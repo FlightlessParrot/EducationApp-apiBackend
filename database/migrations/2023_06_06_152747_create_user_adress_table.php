@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('adress');
             $table->string('city');
             $table->string('postal_code');
+            $table->boolean('newsletter')->default(true);
         });
     }
 

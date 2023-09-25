@@ -21,7 +21,7 @@ class QuestionPolicy
      */
     public function view(User $user, Question $question): bool
     {
-        $test= $question->tests()->whereRelation('users', 'id', $user->id)->first();
+        $test= $question->tests()->where('user_id', $user->id)->first();
         return $test!=null;
     }
 
@@ -40,14 +40,10 @@ class QuestionPolicy
     {
       
     }
-    public function attach(User $user, Question $question):bool
-    {
-        $test= $question->tests()->whereRelation('users', 'id', $user->id)->first();
-        return $test!=null;
-    }
+  
     public function detach(User $user, Question $question):bool
     {
-        $test= $question->tests()->where('role','custom')->whereRelation('users', 'id', $user->id)->first();
+        $test= $question->tests()->where('role','custom')->where('user_id', $user->id)->first();
         return $test!=null;
     }
     /**

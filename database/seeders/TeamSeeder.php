@@ -7,8 +7,11 @@ use App\Models\Team;
 use App\Models\Test;
 use App\Models\User;
 use App\Models\OpenAnswer;
-use App\Models\Question;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Subscription;
+use App\Models\UserAdress;
+use DateTime;
+
 use Illuminate\Database\Seeder;
 
 class TeamSeeder extends Seeder
@@ -19,15 +22,19 @@ class TeamSeeder extends Seeder
     public function run(): void
     {
         $user=User::where('email', 'test@example.com')->first();
-        $team=Team::factory()->has(User::factory(10))->create();
-        
+        $team=Team::factory()->has(User::factory(10)->has(UserAdress::factory()))->create();
+        $date=new DateTime();
+        $date->modify('+1 month');
         
         $team->users()->attach($user,['is_teacher'=>true]); 
         $test=null;
         for($i=0;$i<2;$i++)
-        {
+        { 
+        $subscription=Subscription::factory()->create();
         $test=Test::factory()->create(['name' =>fake()->sentence(), 'role'=>'egzam']);
-        $team->tests()->attach($test);
+        $subscription->tests()->attach($test);
+       
+        $team->tests()->attach($test,['expiration_date'=>$date]);
 
        for($i=0;$i<3;$i++)
        {

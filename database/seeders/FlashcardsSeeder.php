@@ -15,12 +15,12 @@ class FlashcardsSeeder extends Seeder
     public function run(): void
     {
         $user=User::where('email', 'test@example.com')->first();
-
+        $subscription=$user->subscriptions()->first();
         
         $flashcards=Flashcard::factory()->count(10)->make();
         foreach($flashcards as $flashcard)
         {
-        $user->flashcards()->save($flashcard);
+        $subscription->flashcards()->save($flashcard);
         }
     }
 }

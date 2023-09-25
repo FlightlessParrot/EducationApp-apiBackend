@@ -10,7 +10,7 @@ class Square extends Model
     use HasFactory;
 
     protected $fillable=[
-        'brother', 'question_id', 'order', 'name'
+        'brother', 'question_id', 'order', 'name','text'
     ];
     protected $hidden=[
     //    'order', 'brother'

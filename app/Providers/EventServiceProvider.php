@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Providers;
+use App\Events\NotyficationExpired;
+use App\Listeners\DestroyNotyfication;
 use App\Events\OpenAnswersWritten;
 use App\Listeners\CreateOpenQuestionToCheckNotyfication;
 use App\Events\EgzamStarted;
@@ -26,6 +28,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         EgzamStarted::class=>[
             CreateEgzamAvailableNotyfication::class
+        ],
+        NotyficationExpired::class=>[
+            DestroyNotyfication::class
         ]
     ];
 

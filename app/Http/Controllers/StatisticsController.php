@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GeneratedTest;
 use App\Models\Question;
 use App\Models\Team;
 use App\Models\Test;
@@ -16,6 +17,25 @@ use Illuminate\Support\Facades\Auth;
 
 class StatisticsController extends Controller
 {
+
+    public function showStatistics(GeneratedTest $generatedTest)
+    {
+        $this->authorize('view', $generatedTest);
+        $allAnswers = $generatedTest->generatedQuestions()->get();
+        $correctAnswers = $generatedTest->generatedQuestions()->where('answer', true)->where('relevant',true)->get();
+        $wrongAnswers = $generatedTest->generatedQuestions()->where('answer', false)->where('relevant',true)->get();
+        $nonAnswers = $generatedTest->generatedQuestions()->whereNull('answer')->where('relevant',true)->get();
+        $ojojAnswer = $wrongAnswers->merge($nonAnswers);
+        $pass = (count($correctAnswers) / count($allAnswers)) * 100 >= $generatedTest->gandalf;
+        $responseData = [
+            'generatedTest' => $generatedTest,
+            'correctAnswers' => $correctAnswers,
+            'wrongAnswers' => $ojojAnswer,
+            'allAnswers' => $allAnswers,
+            'pass' => $pass
+        ];
+        return $responseData;
+    }
     public function showTeamResults(Team $team,  Test $test)
     {
         $this->authorize('modify',$team);
@@ -68,7 +88,7 @@ class StatisticsController extends Controller
     public function showGeneralStatistic()
     {
         $user=Auth::user();
-        $tests=$user->tests()->get();
+        $tests=$user->tests();
 
         //how many % of all answers has correct answer
         
@@ -77,9 +97,21 @@ class StatisticsController extends Controller
         foreach($tests as $test)
         {
             $questions=$test->questions()->get();
+            $generatedTests=$test->generatedTests()->where('user_id',$user->id)->get();
             $allQuestions=$allQuestions->merge($questions);   
-            $correctQuestions=$test->questions()->whereRelation('generatedQuestions', 'answer', true)->get();
-            $allCorrectQuestions=$allCorrectQuestions->merge($correctQuestions);
+            $correctQuestions=new Collection();
+            foreach($generatedTests as $generatedTest)
+            {
+                $correctGeneratedQuestions=$generatedTest->generatedQuestions()->where('answer', true)->get();
+
+                foreach($correctGeneratedQuestions as $correctGeneratedQuestion)
+                {
+                    $correctQuestions->push($correctGeneratedQuestion->question()->first());    
+                }
+              
+            }
+
+            $allCorrectQuestions=$allCorrectQuestions->merge($correctQuestions)->unique()->values();
         }   
 
   
@@ -125,7 +157,7 @@ class StatisticsController extends Controller
         
         $date->modify($request->input('howOld'));
 
-        $generatedTests=$test->generatedTests()->where('updated_at','>',$date)->where('user_id',Auth::user()->id)->get();
+        $generatedTests=$test->generatedTests()->where('updated_at','>',$date)->where('user_id',Auth::user()->id)->latest()->get();
 
             $avgTimeArray=new Collection();
             $resultArray=new Collection();
@@ -168,7 +200,7 @@ class StatisticsController extends Controller
         {
             $tests=Auth::user()->generatedTests()->get();
             return $query->where('updated_at','>', $date)->whereBelongsTo($tests);
-        })->get();
+        })->where('relevant',true)->latest()->get();
 
         $goodAnswers=0;
         $allAnswers=0; 

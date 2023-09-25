@@ -23,8 +23,8 @@ class CategorySeeder extends Seeder
         foreach ($questions as $question)
         {
            
-            $question->category()->associate($category);
-            $question->save();
+            $question->categories()->attach($category);
+           
         }
         }
     
@@ -32,11 +32,11 @@ class CategorySeeder extends Seeder
         {
        $undercategory=Undercategory::factory()->create();
         
-        $questions=Question::whereNotNull('category_id')->inRandomOrder()->limit(20)->get();
+        $questions=Question::has('categories')->inRandomOrder()->limit(20)->get();
         foreach ($questions as $question)
         {
-        $question->undercategory()->associate($undercategory);
-        $question->save();
+        $question->undercategories()->attach($undercategory);
+     
         }
         }
         }

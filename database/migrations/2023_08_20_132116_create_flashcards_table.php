@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Category;
+use App\Models\Undercategory;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,10 +17,12 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('question');
-            $table->string('path');
-            $table->string('answer');
+            $table->string('path')->nullable();
+            $table->text('answer');
             $table->integer('flashcardable_id');
             $table->string('flashcardable_type');
+            $table->foreignIdFor(Category::class)->nullable();
+            $table->foreignIdFor(Undercategory::class)->nullable();
         });
     }
 

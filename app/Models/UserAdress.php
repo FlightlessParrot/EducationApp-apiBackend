@@ -14,7 +14,8 @@ class UserAdress extends Model
         'city',
         'postal_code',
         'user_id',
-        'nip'
+        'nip',
+        'newsletter'
     ];
     public function user() :BelongsTo
     {

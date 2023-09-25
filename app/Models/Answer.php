@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Answer extends Model
 {
     use HasFactory;
-
+    protected $fillable=[
+      'answer','correct'
+    ];
     protected $hidden=[
       //  'correct'
     ];

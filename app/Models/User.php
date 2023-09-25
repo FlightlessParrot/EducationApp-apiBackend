@@ -3,7 +3,10 @@
 namespace App\Models;
 
 use App\Notifications\ResetPasswordNotification;
+use DateTime;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -61,10 +65,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserAdress::class);
     }
 
-    public function tests():BelongsToMany
-    {
-        return $this->belongsToMany(Test::class);
-    }
 
     public function generatedTests():HasMany
     {
@@ -83,5 +83,24 @@ class User extends Authenticatable implements MustVerifyEmail
     public function flashcards():MorphMany
     {
         return $this->morphMany(Flashcard::class, 'flashcardable');
+    }
+    public function subscriptions()
+    {
+        $date=new DateTime();
+        return $this->morphToMany(Subscription::class, 'subscriptionables')->withPivot('expiration_date')->wherePivot('expiration_date','>=',$date);
+    }
+
+    public function tests() :Collection
+    {
+        $tests= new Collection();
+        $user=Auth::user();
+      foreach($this->subscriptions as $subscription)
+      {
+        $tests=$tests->merge($subscription->tests()->where(function (Builder $querry) use ($user){
+            return $querry->whereNull('user_id')->orWhere('user_id',$user->id);
+        })->where('role','!=','egzam')->get());
+      }
+    
+      return $tests->unique()->values();
     }
 }

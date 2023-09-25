@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Question;
 use App\Models\Team;
 use App\Models\Test;
+use App\Models\Undercategory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Mockery\Undefined;
 
 class QuestionController extends Controller
@@ -36,7 +40,7 @@ class QuestionController extends Controller
        $question=$test->questions()->create($data);
        if ($request->hasFile('image')) {
         $path=$request->image->store('public/images/questions');
-        $question->path=$path;
+        $question->path=Storage::url($path);
         $question->save();
 
         }
@@ -59,7 +63,7 @@ class QuestionController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource.  
      */
     public function show(Question $question)
     {
@@ -77,20 +81,20 @@ class QuestionController extends Controller
     public function find(Request $request)
     {
         $request->validate(['search'=>'nullable|max:250']);
-        $tests=Auth::user()->tests()->get();
+        $tests=Auth::user()->tests();
         $questions=collect([]);
         foreach($tests as $test )
         {
             $newQuestions=$test->questions()->where('question','like','%'.$request->search.'%')->get();
             $questions=$questions->concat($newQuestions);
         }
-        return $questions->chunk(12)[0];
+        return $questions;
    
     }
     public function findUnowned(Request $request, Test $test)
     {
         $request->validate(['search'=>'nullable|max:250']);
-        $tests=Auth::user()->tests()->get();
+        $tests=Auth::user()->tests();
         $questions=collect([]);
         foreach($tests as $ownTest )
         {
@@ -112,16 +116,75 @@ class QuestionController extends Controller
             $questions=$questions->unique('id');
             }
         }
+
+        $categories=$request->input('categories');
+        $undercategories=$request->input('undercategories');
+        $questionsByCategories=new Collection();
+        $questionsByUndercategories=new Collection();
+        if($categories){
+            foreach($categories as $categoryId)
+            {
+                $category=Category::find($categoryId);
+                $questionsOfCategory=$category->questions()->get();
+                $searchedQuestionFilteredByCategory=$questions->intersect($questionsOfCategory); 
+                $questionsByCategories=$questionsByCategories->merge($searchedQuestionFilteredByCategory);
+            }
+        }
+        if($undercategories)
+        {
+            foreach($undercategories as $undercategoryId)
+            {
+                $undercategory=Undercategory::find($undercategoryId);
+                $questionsOfUndercategory=$undercategory->questions()->get();
+                $searchedQuestionFilteredByUndercategory=$questions->intersect($questionsOfUndercategory);
+                $questionsByUndercategories=$questionsByUndercategories->merge($searchedQuestionFilteredByUndercategory);
+            }
+        }
+        if($questionsByCategories->isNotEmpty() || $questionsByUndercategories->isNotEmpty())
+        {
+            $questions=$questionsByCategories->merge($questionsByUndercategories);
+        }
+
        
-        return Response( count($questions) ? $questions->chunk(12)[0] : $questions);
+        return Response(  $questions);
        
     }
     public function findOwned(Request $request, Test $test):Response
     {
         $request->validate(['search'=>'nullable|max:250']);
         $this->authorize('view', $test);
-
-        return Response($test->questions()->where('question','like','%'.$request->search.'%')->limit(12)->get());
+        $questions=$test->questions()->where('question','like','%'.$request->search.'%')->get();
+        $categories=$request->input('categories');
+        $undercategories=$request->input('undercategories');
+        $questionsByCategories=new Collection();
+        $questionsByUndercategories=new Collection();
+        if($categories)
+        {
+            foreach($categories as $categoryId)
+            {
+                $category=Category::find($categoryId);
+                $questionsOfCategory=$category->questions()->get();
+                $searchedQuestionFilteredByCategory=$questions->intersect($questionsOfCategory);
+                $questionsByCategories=$questionsByCategories->merge($searchedQuestionFilteredByCategory);
+                $questionsByCategories->unique()->values();
+            }
+        }
+        if($undercategories)
+        {
+            foreach($undercategories as $undercategoryId)
+            {
+                $undercategory=Undercategory::find($undercategoryId);
+                $questionsOfUndercategory=$undercategory->questions()->get();
+                $searchedQuestionFilteredByUndercategory=$questions->intersect($questionsOfUndercategory);
+                $questionsByUndercategories=$questionsByUndercategories->merge($searchedQuestionFilteredByUndercategory);
+                $questionsByUndercategories->unique()->values();
+            }
+        }
+        if($questionsByCategories->isNotEmpty() || $questionsByUndercategories->isNotEmpty())
+        {
+            $questions=$questionsByCategories->merge($questionsByUndercategories);
+        }
+        return Response( $questions );
        
     }
     /**
@@ -131,10 +194,20 @@ class QuestionController extends Controller
     {
         //
     }
-
+    private function filterQuestionsByCategories($questions, $categories)
+    {
+        
+    }
     /**
      * Remove the specified resource from storage.
      */
+
+     public function remove(Question $question)
+     {
+        $question->delete();
+
+        return response()->noContent();
+     }
     public function destroy(Test $test, Question $question)
     {
        
@@ -153,7 +226,6 @@ class QuestionController extends Controller
     public function attach(Test $test, Question $question)
     {
         $this->authorize('update',$test);
-        $this->authorize('attach', $question);
         $test->questions()->attach($question->id);
         return response()->noContent();
     }

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Flashcard>
@@ -18,8 +19,8 @@ class FlashcardFactory extends Factory
     {
         return [
                 'question'=>fake()->sentence().'?',
-                'answer'=>fake()->sentence(),
-                'path'=>'/images/rose.jpg'
+                'answer'=>'<p>'.fake()->sentence().'<p>',
+                'path'=>Storage::url('public/images/rose.jpg')
         ];
     }
 }

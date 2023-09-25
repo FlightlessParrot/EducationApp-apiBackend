@@ -22,7 +22,7 @@ class CreateEgzamAvailableNotyfication
     public function handle(EgzamStarted $event): void
     {
         $test=$event->test;
-        $team=$test->teams()->firstOrFail();
+        $team=$test->team()->firstOrFail();
         foreach($team->users as $user)
         {
             if(!$user->pivot->is_teacher)

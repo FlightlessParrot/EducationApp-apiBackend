@@ -23,7 +23,7 @@ class CreateOpenQuestionToCheckNotyfication
     public function handle(OpenAnswersWritten $event): void
     {
         $test=$event->test;
-        $team=$test->teams()->firstOrFail();
+        $team=$test->team()->firstOrFail();
         $user=$team->users()->wherePivot('is_teacher',true)->firstOrFail();
         $notyfication=new Notyfication(['user_id'=>$user->id, 
             'name'=>'Niesprawdzone odpowiedzi do pytań otwartych','description'=>'Sprawdź odpowiedzi udzielone na pytania otwarte w egzaminie "'.$test->name.'"',

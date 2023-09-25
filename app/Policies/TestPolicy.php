@@ -22,7 +22,7 @@ class TestPolicy
      */
     public function view(User $user, Test $test): bool
     {
-        $bolleanValue=$test->users()->find($user->id)!=null;
+        $bolleanValue=$user->tests()->where('id',$test->id)!=null;
             foreach($user->teams as $team)
             {
                $findTest= $team->tests()->find($test->id);
@@ -49,12 +49,12 @@ class TestPolicy
     public function update(User $user, Test $test): bool
     {
         
-        return $test->users()->find($user->id)!=null && $test->role==='custom';
+        return  $user->tests()->where('id',$test->id)!=null && $test->role==='custom';
     }
     public function updateEgzam(User $user, Test $test, Team $team): bool
     {
 
-        $belongsToTeamRule=$test->teams()->find($team->id)!=null;
+        $belongsToTeamRule=$team->tests()->where('id',$test->id)!=null;
 
         $egzamRule=$test->role==='egzam';
 
@@ -68,13 +68,13 @@ class TestPolicy
      */
     public function delete(User $user, Test $test): bool
     {
-        return $test->users()->find($user->id)!=null && $test->role==='custom';
+        return $user->tests()->where('id',$test->id)!=null && $test->role==='custom';
     }
 
     public function deleteEgzam(User $user, Test $test, Team $team): bool
     {
 
-        $belongsToTeamRule=$test->teams()->find($team->id)!=null;
+        $belongsToTeamRule=$team->tests()->where('id',$test->id)!=null;
 
         $egzamRule=$test->role==='egzam';
 

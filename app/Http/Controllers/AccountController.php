@@ -15,7 +15,7 @@ class AccountController extends Controller
     {
         $adress=Auth::user()->userAdress()->first();
 
-        return Response(['adress'=>$adress,'name'=>Auth::user()->name   ]);
+        return Response(['adress'=>$adress,'user'=>Auth::user() ]);
     }
 
     public function update(Request $request)
@@ -36,5 +36,13 @@ class AccountController extends Controller
         $userAdress->save();
         return response()->noContent();
         
+    }
+
+    public function toogleNewsletter()
+    {
+        $userAdress=Auth::user()->userAdress()->first();
+        $userAdress->newsletter=!(bool)$userAdress->newsletter;
+        $userAdress->save();
+        return response()->noContent();
     }
 }

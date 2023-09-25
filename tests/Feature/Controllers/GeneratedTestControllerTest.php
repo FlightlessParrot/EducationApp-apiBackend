@@ -17,7 +17,7 @@ class GeneratedTestControllerTest extends TestCase
     use RefreshDatabase;
     private $data=[
         'egzam'=>'false',
-        
+        'gandalf'=>'50',
         'time'=>'00:50',
         'questionsOneAnswer'=>'one-answer',
         'questionsManyAnswers'=>'many-answer',
@@ -65,7 +65,8 @@ class GeneratedTestControllerTest extends TestCase
             'egzam'=>'false',
             'test_id'=>'g'.$test->id,
             'time'=>'00:50',
-            'questions_number'=>'150'
+            'questions_number'=>'150',
+            'gandalf'=>'50'
         ]);
 
         $response->assertNotFound();
@@ -93,7 +94,8 @@ class GeneratedTestControllerTest extends TestCase
             'egzam'=>'false',
             'test_id'=>$test->id,
             'time'=>'00:50',
-            'questions_number'=>'150'
+            'questions_number'=>'150',
+            'gandalf'=>'50'
         ]);
         $response->assertSuccessful();
         $genTest=$user->generatedTests()->first();
@@ -138,3 +140,4 @@ class GeneratedTestControllerTest extends TestCase
     }
 
 }
+

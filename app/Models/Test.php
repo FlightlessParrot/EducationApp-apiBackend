@@ -15,7 +15,7 @@ class Test extends Model
     use HasFactory;
 
     protected $fillable=[
-        'name', 'role', 'fillable', 'maximum_time', 'path', 'gandalf'
+        'name', 'role', 'fillable', 'maximum_time', 'path', 'gandalf', 'user_id', 'subscription_id', 'team_id'
     ];
     public function questions(): BelongsToMany
     {
@@ -23,17 +23,17 @@ class Test extends Model
 
     }
 
-    public function users():BelongsToMany
+    public function user():BelongsTo
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsTo(User::class);
     }
-
+    
     public function generatedTests():HasMany
     {
         return $this->hasMany(GeneratedTest::class);
     }
 
-    public function teams():BelongsToMany
+    public function team(): BelongsToMany
     {
         return $this->belongsToMany(Team::class);
     }
@@ -41,6 +41,11 @@ class Test extends Model
     public function notyfications():MorphMany
     {
         return $this->morphMany(Notyfication::class, "notyficationable");
+    }
+
+    public function subscriptions() : BelongsToMany
+    {
+        return $this->belongsToMany(Subscription::class);
     }
 
 }

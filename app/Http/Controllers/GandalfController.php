@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Events\EgzamStarted;
+use App\Events\NotyficationExpired;
 use App\Models\GeneratedQuestion;
 use App\Models\GeneratedTest;
 use App\Models\Team;
 use App\Models\Test;
+use DateTime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,9 +21,12 @@ class GandalfController extends Controller
          $this->authorize('delete',$generatedTest);
          $this->authorize('update',$team);
          $request->validate(['name'=>'required|max:250']);
-
-         $egzam=$team->tests()->create(['name'=>$request->input('name'),'role'=>'egzam', 'fillable'=>false,'maximum_time'=>$generatedTest->time]);
-         error_log('Test jest wystartowany: '.$egzam->fillable);
+        $subscription=$generatedTest->test()->first()->subscription()->first();
+         $egzam=$subscription->tests()->create(['name'=>$request->input('name'),'role'=>'egzam', 'fillable'=>false,'maximum_time'=>$generatedTest->time]);
+         $date=new DateTime();
+         $date->modify('+3 months');
+         $team->tests()->attach($egzam,['expiration_date'=>$date]);
+        
         $generatedQuestions=$generatedTest->generatedQuestions()->get();
         foreach($generatedQuestions as $generatedQuestion)
         {
@@ -55,7 +60,9 @@ class GandalfController extends Controller
             
             $question->generatedQuestions()->save($generatedQuestion);
         }
-
+        $notyfication=$test->notyfications()->where('user_id',Auth::user()->id)->first();
+        NotyficationExpired::dispatch($notyfication);
+        
         return response(['test'=>$generatedTest->id]);
     
     }
@@ -78,8 +85,9 @@ class GandalfController extends Controller
         return response(['egzams'=>$egzams]);
 
     }
-    public function startEgzam(Team $team, Test $test)
+    public function startEgzam(Test $test)
     {
+        $team=$test->team()->first();
         $this->authorize('update', $team);
         $test->fillable=true;
         $test->save();
@@ -95,7 +103,9 @@ class GandalfController extends Controller
         $tests=new Collection();
             foreach(Auth::user()->teams as $team)
             {
-                $teamTests=$team->tests()->where('role','egzam')->where('name','like','%'.$request->search.'%')->get();
+                $teamTests=$team->tests()->where('role','egzam')->get()->filter(function(Test $test) use($request){
+                    return str_contains(strtolower($test->name),strtolower($request->search));
+                });
                 $tests=$tests->merge($teamTests);
             }
             
@@ -103,3 +113,4 @@ class GandalfController extends Controller
         return response($tests);
     }
 }
+

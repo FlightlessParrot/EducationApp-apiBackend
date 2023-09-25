@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NotyficationExpired;
+use App\Models\Notyfication;
 use App\Models\OpenAnswer;
 use App\Models\Test;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OpenAnswerController extends Controller
 {
     public function index(Test $test)
     {
-        $this->authorize('modify',$test->teams()->first());
+        $this->authorize('modify',$test->team()->first());
         $openQuestions=$test->questions()->where('type','open')->get();
         
         foreach($openQuestions as $question)
@@ -22,6 +25,8 @@ class OpenAnswerController extends Controller
             }
 
         }
+        $notyfication=$test->notyfications()->where('user_id',Auth::user()->id)->first();
+        NotyficationExpired::dispatch($notyfication);
         return redirect('/');
     }
 
@@ -33,7 +38,7 @@ class OpenAnswerController extends Controller
         $generatedQuestion=$openAnswer->generatedQuestion()->first();
         $generatedTest=$generatedQuestion->generatedTest()->first();
         $test=$generatedTest->test()->first();
-        $this->authorize('modify',$test->teams()->first());
+        $this->authorize('modify',$test->team()->first());
         $generatedQuestion->relevant=true;
         $generatedQuestion->answer=$request->input('grade')==='good';
         $generatedQuestion->save();
@@ -52,7 +57,7 @@ class OpenAnswerController extends Controller
         if($controller)
         {
             $notyfication=$test->notyfications()->where('type','openQuestionToCheck')->first();
-            $notyfication->delete();
+           NotyficationExpired::dispatch($notyfication);
         }
         return response()->noContent();
     }

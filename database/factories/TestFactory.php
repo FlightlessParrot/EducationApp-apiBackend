@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Test>
@@ -18,7 +19,7 @@ class TestFactory extends Factory
     {
         return [
             'name'=>fake()->sentence(),
-            'path'=>'/images/out.jpg'
+            'path'=>Storage::url('public/images/out.jpg')
         ];
     }
 }

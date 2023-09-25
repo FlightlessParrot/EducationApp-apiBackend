@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Subscription;
 use App\Models\Team;
 use App\Models\Test;
 use App\Models\User;
@@ -70,27 +71,25 @@ class TeamController extends Controller
         //
     }
 
-    public function addTest(Team $team, Test $test)
+   
+    public function attachTest(Team $team, Test $test)
     {
         $this->authorize('modify', $team);
-        $this->authorize('update',$test);
-
+        $subscription=$test->subscription()->first();
+        $this->authorize('update',$subscription);
+        $teacher=Auth::user();
         
-        $team->tests()->attach($test);
+        $expiration_date=$teacher->subscriptions()->find($subscription->id)->pivot->expiration_date;
+        $team->tests()->attach($test,['expiration_date'=>$expiration_date]);
         return response(['title'=>'Udostępniono materiał','description'=>'Udało się udostępnić materiał zespołowi.']);
-        
-
     }
-
-    public function removeTest(Team $team, Test $test)
+    public function detachTest(Team $team, Test $test)
     {
-        
         $this->authorize('modify', $team);
-        $this->authorize('update',$test);
-
         $team->tests()->detach($test);
         return response(['title'=>'Usunięto materiał','description'=>'Udało się usunąć materiał.']);
     }
+   
     public function addUser(Team $team, User $user)
     {
         $this->authorize('modify', $team);
@@ -113,6 +112,8 @@ class TeamController extends Controller
     }
     public function destroy(Team $team)
     {
-        
+        $this->authorize('delete', $team);
+        $team->delete();
+        return response()->noContent();
     }
 }

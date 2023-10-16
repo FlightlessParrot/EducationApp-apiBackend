@@ -140,6 +140,10 @@ class TestController extends Controller
    {
            $request->validate(['image'=>'image']);
            $path=$request->image->store('public/images/tests');
+           If($test->path!==null)
+           {
+            Storage::delete(str_replace('/storage','public',$test->path));
+           }
            $test->path=Storage::url($path);
            $test->save();
    

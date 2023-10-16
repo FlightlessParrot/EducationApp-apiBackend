@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Flashcard extends Model
 {
@@ -14,9 +14,9 @@ class Flashcard extends Model
         'question','answer','path','undercategory_id', 'category_id'
     ];
 
-    public function flashcardable():MorphTo
+    public function subscriptions():MorphToMany
     {
-        return $this->morphTo();
+        return $this->morphedByMany(Subscription::class, 'flashcardable');
     }
 
     public function undercategory()
@@ -28,4 +28,5 @@ class Flashcard extends Model
     {
         return $this->belongsTo(Category::class);
     }
+  
 }

@@ -21,6 +21,7 @@ class SubscriptionController extends Controller
         $allSubscriptions=Subscription::where('active',true)->where('license_duration','>=',$date)->get();
         $unownedSubscriptions=$allSubscriptions->diff($ownedSubscriptions);
         $unownedSubscriptionWithTests=[];
+       
         foreach($unownedSubscriptions as $unownedSubscription)
         {
             $tests=$unownedSubscription->tests()->get()->toArray();
@@ -104,6 +105,7 @@ class SubscriptionController extends Controller
         $subscription->discount_price=$request->discount_price;
         $subscription->license_duration=$request->license_duration;
         $subscription->lowest_price=$request->lowest_price;
+        $subscription->description=$request->description;
         $subscription->save();
 
         return response(['subscription'=>$subscription]);
@@ -144,6 +146,8 @@ class SubscriptionController extends Controller
      */
     public function show(Subscription $subscription)
     {
+        $tests=$subscription->tests()->get()->toArray();
+        $subscription['tests']=$tests;
        return response(['subscription'=>$subscription]);
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Flashcard;
 use App\Models\Subscription;
+use Hamcrest\Type\IsNumeric;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -77,17 +78,26 @@ class FlashcardController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Subscription $subscription)
+    public function store(Request $request)
     {
         $request->validate([
             'question'=>'required|max:250',
             'answer'=>'required|max:10000',
-            'category_id'=>'integer',
-            'undercategory_id'=>'integer'
+            'category_id'=>'integer|nullable',
+            'undercategory_id'=>'integer|nullable',
+            
         ]);
-        $all=$request->all();
-        $flashcard=$subscription->flashcards()->create($all);
-
+        $flashcard=Flashcard::make();
+        $flashcard->question=$request->question;
+        $flashcard->answer=$request->answer;
+        $flashcard->category_id= $request->category_id ;
+        $flashcard->undercategory_id= $request->undercategory_id ;
+        $flashcard->save();
+        foreach($request->subscriptions as $subscription)
+        {
+            $flashcard->subscriptions()->attach($subscription);
+        }
+        
         return response(['flashcard'=>$flashcard]);
     }
 
@@ -98,6 +108,11 @@ class FlashcardController extends Controller
             'image'=>'image',
            
         ]);
+        if($flashcard->path!==null)
+        {
+         
+          Storage::delete(str_replace('/storage','public',$flashcard->path));
+        }
         $path=$request->image->store('public/images/flashcards');
         $flashcard->path=Storage::url($path);
         $flashcard->save();
@@ -109,7 +124,8 @@ class FlashcardController extends Controller
      */
     public function show(Flashcard $flashcard)
     {
-        //
+        $flashcard['subscriptions']=$flashcard->subscriptions()->get();
+        return response(['flashcard'=>$flashcard]);
     }
 
     /**
@@ -125,7 +141,29 @@ class FlashcardController extends Controller
      */
     public function update(Request $request, Flashcard $flashcard)
     {
-        //
+        $request->validate([
+            'question'=>'required|max:250',
+            'answer'=>'required|max:10000',
+            'category_id'=>'integer|nullable',
+            'undercategory_id'=>'integer|nullable'
+        ]);
+
+  
+        $flashcard->question=$request->question;
+        $flashcard->answer=$request->answer;
+        $flashcard->category_id= $request->category_id ;
+        $flashcard->undercategory_id= $request->undercategory_id ;
+        foreach($flashcard->subscriptions as $subscription)
+        {
+            $flashcard->subscriptions()->detach($subscription);
+        }
+        foreach($request->subscriptions as $subscription)
+        {
+            $flashcard->subscriptions()->attach($subscription);
+        }
+        $flashcard->save();
+
+        return response(['flashcard'=>$flashcard]);
     }
 
     /**
@@ -133,6 +171,10 @@ class FlashcardController extends Controller
      */
     public function destroy(Flashcard $flashcard)
     {
+        if($flashcard->path!==null)
+        {
+            Storage::delete(str_replace('/storage','public',$flashcard->path));
+        } 
         $bool=$flashcard->delete();
         if(!$bool)
         {

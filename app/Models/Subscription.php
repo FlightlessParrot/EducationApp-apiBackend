@@ -13,15 +13,15 @@ class Subscription extends Model
 {
     use HasFactory;
 
-    protected $fillable=['name', 'price','license_duration','active','discount_price', 'lowest_price'];
+    protected $fillable=['name', 'price','license_duration','active','discount_price', 'lowest_price', 'description'];
 
     public function users():MorphToMany
     {
-        return $this->morphedByMany(User::class,'subscriptionabble');
+        return $this->morphedByMany(User::class,'subscriptionables');
     }
     public function teams(): MorphToMany
     {
-        return $this->morphedByMany(Team::class,'subscriptionabble');
+        return $this->morphedByMany(Team::class,'subscriptionables');
     }
 
     public function tests():BelongsToMany
@@ -29,8 +29,13 @@ class Subscription extends Model
        return $this->belongsToMany(Test::class);
     }
 
-    public function flashcards():MorphMany
+    public function flashcards():MorphToMany
     {
-        return $this->morphMany(Flashcard::class, 'flashcardable');
+        return $this->morphToMany(Flashcard::class, 'flashcardable');
+    }
+
+    public function discount_codes() : BelongsToMany
+    {
+        return $this->belongsToMany(DiscountCode::class);
     }
 }

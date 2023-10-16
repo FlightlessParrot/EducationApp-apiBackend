@@ -22,6 +22,7 @@ use App\Http\Controllers\GeneratedTestController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\NotyficationController;
 use App\Http\Controllers\OpenAnswerController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\SubscriptionController;
@@ -111,7 +112,10 @@ Route::middleware(['auth'])->group(function () {
     Route::put('account/newsletter/toggle',[AccountController::class, 'toogleNewsletter']);
     Route::get('/subscriptions',[SubscriptionController::class, 'index']);
 
-    Route::get('categories/all/undercategories/all',[CategoryController::class, 'showAllCategoriesAndUndercategories']);
+    Route::get('categories/all/undercategories/all',[CategoryController::class, 'showAllCategoriesAndUndercategories']); 
+    Route::get('subscription/{subscription}',[SubscriptionController::class,'show']);
+    Route::get('/code/{code}',[DiscountCodeController::class,'verify']);
+    Route::post('/payments/subscription/{subscription}',[PaymentController::class,'makePayment']); 
 });
 
 Route::middleware(['auth','teamleader'])->group(function()
@@ -141,6 +145,9 @@ Route::middleware(['auth','teamleader'])->group(function()
 
     Route::put('open-answers/{openAnswer}/grade',[OpenAnswerController::class, 'giveGrade']);
     Route::get('egzams/{test}/open-question',[OpenAnswerController::class, 'index']);
+
+
+   
     
 });
 
@@ -148,9 +155,13 @@ Route::middleware(['auth','admin'])->group(
     function(){
         Route::post('subscription/create',[SubscriptionController::class,'store']);
         Route::put('subscription/{subscription}/update',[SubscriptionController::class,'update']);
-        Route::get('subscription/{subscription}',[SubscriptionController::class,'show']);
+       
+        Route::get('flashcard/{flashcard}',[FlashcardController::class,'show']);
+        Route::put('/flashcard/{flashcard}/update',[FlashcardController::class,'update'] );
+
         Route::delete('subscription/{subscription}/delete',[SubscriptionController::class,'destroy']);
         Route::get('subscriptions/inactive',[SubscriptionController::class,'showInactiveSubscriptions']);
+        Route::get('subscriptions/active',[SubscriptionController::class,'showAllActiveSubscriptions']);
         Route::put('subscription/{subscription}/activate',[SubscriptionController::class, 'activateSubscription']);
         Route::put('subscription/{subscription}/disactivate',[SubscriptionController::class, 'disactivateSubscription']);
         Route::get('tests/all', [TestController::class, 'show']);
@@ -178,7 +189,7 @@ Route::middleware(['auth','admin'])->group(
         Route::delete('categories/{category}/delete',[CategoryController::class, 'deleteCategory']);
         Route::delete('undercategories/{undercategory}/delete',[CategoryController::class, 'deleteUndercategory']);
 
-        Route::post('subscription/{subscription}/flashcard/new',[FlashcardController::class,'store']);
+        Route::post('/flashcard/new',[FlashcardController::class,'store']);
         Route::put('flashcards/{flashcard}/image/update',[FlashcardController::class,'addImage']);
         Route::get('subscriptions/{subscription}/flashcards/find',[FlashcardController::class,'find']);
 

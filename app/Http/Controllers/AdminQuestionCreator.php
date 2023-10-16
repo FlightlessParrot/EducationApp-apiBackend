@@ -107,6 +107,10 @@ class AdminQuestionCreator extends Controller
     {
             $request->validate(['image'=>'image']);
             $path=$request->image->store('public/images/questions');
+            if($question->path!==null)
+            {
+                Storage::delete(str_replace('/storage','public',$question->path));
+            }
             $question->path=Storage::url($path);
             $question->save();
     

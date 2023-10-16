@@ -23,7 +23,8 @@ class SubscriptionFactory extends Factory
            'name'=>fake()->sentence(),
            'price'=>fake()->randomFloat(2,5,8),
             'license_duration'=>$date,
-            'active'=>true
+            'active'=>true,
+            'description'=>fake()->text()
         ];
     }
 }

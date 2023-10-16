@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\DiscountCode;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
+
+use function PHPUnit\Framework\isNull;
 
 class DiscountCodeController extends Controller
 {
@@ -23,7 +26,12 @@ class DiscountCodeController extends Controller
     {
         //
     }
-
+    public function verify(string $code)
+    {
+        $discountCode=DiscountCode::where('code',$code)->first();
+         $discount= is_null( $discountCode) ? null: $discountCode->discount;
+        return response(['code'=>$discountCode, 'discount'=>$discount]);
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -37,6 +45,11 @@ class DiscountCodeController extends Controller
 
         $code=DiscountCode::create(['code'=>$request->code, 'discount'=>$request->discount]);
 
+        foreach($request->subscriptions as $subscriptionId)
+        {
+            $subscription=Subscription::find($subscriptionId);
+            $subscription->discount_codes()->attach($code);
+        }
         return response(['discountCode'=>$code]);
     }
 

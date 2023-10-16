@@ -6,6 +6,8 @@ use App\Listeners\DestroyNotyfication;
 use App\Events\OpenAnswersWritten;
 use App\Listeners\CreateOpenQuestionToCheckNotyfication;
 use App\Events\EgzamStarted;
+use App\Listeners\AddSubscriptionAndSendMail;
+use App\Events\PaymentStatusChange;
 use App\Listeners\CreateEgzamAvailableNotyfication;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -31,6 +33,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         NotyficationExpired::class=>[
             DestroyNotyfication::class
+        ],
+        PaymentStatusChange::class=>[
+            AddSubscriptionAndSendMail::class
         ]
     ];
 

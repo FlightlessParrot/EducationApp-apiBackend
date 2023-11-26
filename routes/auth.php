@@ -79,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/tests/{test}/questions/{question}/attach',[QuestionController::class, 'attach']);
     Route::post('/questions/find',[QuestionController::class, 'find']);
+    
     Route::post('/tests/{test}/questions/owned',[QuestionController::class, 'findOwned']);
     Route::post('/tests/{test}/questions/unowned',[QuestionController::class, 'findUnowned']);
     Route::delete('/tests/{test}/questions/{question}/detach',[QuestionController::class, 'destroy']);
@@ -153,6 +154,8 @@ Route::middleware(['auth','teamleader'])->group(function()
 
 Route::middleware(['auth','admin'])->group(
     function(){
+        Route::get('/questions/{question}',[QuestionController::class,'show']);
+
         Route::post('subscription/create',[SubscriptionController::class,'store']);
         Route::put('subscription/{subscription}/update',[SubscriptionController::class,'update']);
        
@@ -175,6 +178,8 @@ Route::middleware(['auth','admin'])->group(
         Route::post('subscription/{subscription}/test/create',[TestController::class, 'adminStore']);
         Route::put('subscription/{subscription}/test/{test}/update',[TestController::class, 'changeSubscription']);
         Route::post('test/{test}/question/create',[AdminQuestionCreator::class, 'createQuestion']);
+        Route::put('question/{question}/update',[AdminQuestionCreator::class, 'editQuestion']);
+
         Route::post('question/{question}/one-answer/create',[AdminQuestionCreator::class,'addAnswers']);
         Route::post('question/{question}/many-answers/create',[AdminQuestionCreator::class,'addAnswers']);
         Route::post('question/{question}/order/create',[AdminQuestionCreator::class,'addOrder']);

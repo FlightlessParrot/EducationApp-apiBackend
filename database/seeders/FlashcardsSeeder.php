@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Flashcard;
+use App\Models\Undercategory;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,11 +18,18 @@ class FlashcardsSeeder extends Seeder
     {
         $user=User::where('email', 'test@example.com')->first();
         $subscription=$user->subscriptions()->first();
-        
+        for($i=0; $i<2; $i++)
+        {
         $flashcards=Flashcard::factory()->count(10)->make();
+        $category=Category::factory()->create();
+        $undercategory=Undercategory::factory()->create();
         foreach($flashcards as $flashcard)
         {
         $subscription->flashcards()->save($flashcard);
+        $flashcard->category()->associate($category);
+        $flashcard->undercategory()->associate($undercategory);
+        $flashcard->save();
         }
+    }
     }
 }

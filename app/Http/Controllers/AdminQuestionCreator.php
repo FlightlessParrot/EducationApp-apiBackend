@@ -31,17 +31,59 @@ class AdminQuestionCreator extends Controller
         ]);
         foreach($categories as $categoryId)
         {
-            $category=Category::find($categoryId);
-            $category->questions()->attach($question);
+            $category=Category::findOrFail($categoryId);
+            $question->categories()->attach($category);
         }
         foreach($undercategories as $undercategoryId)
         {
-            $undercategory=Undercategory::find($undercategoryId);
-            $undercategory->questions()->attach($undercategory);
+            $undercategory=Undercategory::findOrFail($undercategoryId);
+            $question->undercategories()->attach($undercategory);
         }
         return response(['question'=>$question]);
     }
 
+    public function editQuestion(Request $request, Question $question)
+    {
+  
+        $request->validate(
+            [
+                'question'=>'required|max:250',
+                'type'=>'required'
+            ]
+            );
+        $all=$request->all();
+        $categories=$all['categories'];
+        $undercategories=$all['undercategories'];
+        
+        $question->update([
+        'question'=>$all['question'],
+        'type'=>$all['type'],
+        'explanation'=>$all['explanation']    
+        ]);
+        foreach($question->categories as $category)
+        {
+             $question->categories()->detach($category);
+        }
+        foreach($question->undercategories as $undercategory)
+        {
+             $question->undercategories()->detach($undercategory);
+        }
+
+        $question->answers()->delete();
+        $question->squares()->delete();
+        
+        foreach($categories as $categoryId)
+        {
+            $category=Category::findOrFail($categoryId);
+            $question->categories()->attach($category);
+        }
+        foreach($undercategories as $undercategoryId)
+        {
+            $undercategory=Undercategory::findOrFail($undercategoryId);
+            $question->undercategories()->attach($undercategory);
+        }
+        return response(['question'=>$question]);
+    }
     public function addAnswers(Request $request, Question $question )
     {
        $all=$request->all();

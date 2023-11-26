@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Mockery\Undefined;
+
 
 class QuestionController extends Controller
 {
@@ -24,9 +24,6 @@ class QuestionController extends Controller
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function createEgzamQuestion(Request $request,Team $team, Test $test)
     {
         $this->authorize('updateEgzam',[$test, $team]);
@@ -65,9 +62,14 @@ class QuestionController extends Controller
     /**
      * Display the specified resource.  
      */
-    public function show(Question $question)
+    public function show(Question $question): Response
     {
-        //
+        $data=$question->toArray();
+        $data['categories']=$question->categories()->get();
+        $data['undercategories']=$question->undercategories()->get();
+        $data['answers']=$question->answers()->get();
+        $data['squares']=$question->squares()->get();
+        return Response(['question'=>$data]);
     }
 
     /**
@@ -146,7 +148,7 @@ class QuestionController extends Controller
         }
 
        
-        return Response(  $questions);
+        return Response( $questions);
        
     }
     public function findOwned(Request $request, Test $test):Response
@@ -194,10 +196,7 @@ class QuestionController extends Controller
     {
         //
     }
-    private function filterQuestionsByCategories($questions, $categories)
-    {
-        
-    }
+
     /**
      * Remove the specified resource from storage.
      */

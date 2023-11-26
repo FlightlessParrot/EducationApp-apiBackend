@@ -43,13 +43,28 @@ class CategoryController extends Controller
     public function showFlashCardsCategoriesAndUndercategories()
     {
         $user=Auth::user();
-        $flashcards=$user->flashcards()->get();
+        $subscriptions=$user->subscriptions()->get();
+        $flashcards=new Collection();
+        foreach($subscriptions as $subscription)
+        {
+            $flashcards=$flashcards->merge($subscription->flashcards()->get());
+        }
+        $flashcards=$flashcards->unique();
         $categories=new Collection();
         $undercategories=new Collection();
         foreach($flashcards as $flashcard)
         {
-           $categories->push($flashcard->category()->first());
-            $undercategories->push($flashcard->undercategory()->first());
+            $category=$flashcard->category()->first();
+            if($category!==null)
+            {
+                 $categories->push($category);
+            }
+            $undercategory=$flashcard->undercategory()->first();
+            if($undercategory!==null)
+            {
+                $undercategories->push($undercategory);
+            }
+            
         }
         $categories=$categories->unique();
         $undercategories=$undercategories->unique();

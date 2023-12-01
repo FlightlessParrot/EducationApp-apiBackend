@@ -29,10 +29,6 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserRoleController;
-use App\Models\Category;
-use App\Models\DiscountCode;
-use App\Models\Flashcard;
-use App\Models\Question;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [RegisteredUserController::class, 'store'])
@@ -167,6 +163,8 @@ Route::middleware(['auth','admin'])->group(
         Route::get('subscriptions/active',[SubscriptionController::class,'showAllActiveSubscriptions']);
         Route::put('subscription/{subscription}/activate',[SubscriptionController::class, 'activateSubscription']);
         Route::put('subscription/{subscription}/disactivate',[SubscriptionController::class, 'disactivateSubscription']);
+        Route::post('subscription/{subscription}/photo',[SubscriptionController::class, 'storeImage']);
+
         Route::get('tests/all', [TestController::class, 'show']);
         Route::get('subscriptions/all',[SubscriptionController::class,'showAllSubscriptions']);
         Route::get('test/{test}',[TestController::class,'getTest']);

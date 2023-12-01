@@ -7,6 +7,7 @@ use DateTime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class SubscriptionController extends Controller
 {
@@ -159,7 +160,26 @@ class SubscriptionController extends Controller
         //
     }
 
+    /**
+     * Deleting previous image and add the new one to the subscription.
+     */
+    public function storeImage(Request $request, Subscription $subscription)
+    {
+        $request->validate([
+            'image'=>'image',
+           
+        ]);
+        if($subscription->path!==null)
+        {
+         
+          Storage::delete(str_replace('/storage','public',$subscription->path));
+        }
+        $path=$request->image->store('public/images/subscriptions');
+        $subscription->path=Storage::url($path);
+        $subscription->save();
 
+        return response(['image'=>$subscription->path]);
+    }
     /**
      * Remove the specified resource from storage.
      */

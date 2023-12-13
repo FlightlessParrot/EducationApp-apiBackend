@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Flashcard extends Model
@@ -11,7 +12,7 @@ class Flashcard extends Model
     use HasFactory;
 
     protected $fillable=[
-        'question','answer','path','undercategory_id', 'category_id'
+        'question','answer','path',
     ];
 
     public function subscriptions():MorphToMany
@@ -19,14 +20,14 @@ class Flashcard extends Model
         return $this->morphedByMany(Subscription::class, 'flashcardable');
     }
 
-    public function undercategory()
+    public function undercategories() : BelongsToMany
     {
-        return $this->belongsTo(Undercategory::class);
+        return $this->belongsToMany(Undercategory::class);
     }
 
-    public function category()
+    public function categories() : BelongsToMany
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsToMany(Category::class);
     }
   
 }

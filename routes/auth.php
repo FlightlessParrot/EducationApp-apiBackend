@@ -189,6 +189,7 @@ Route::middleware(['auth','admin'])->group(
 
         Route::post('category/new',[CategoryController::class,'storeCategory']);
         Route::post('undercategory/new',[CategoryController::class,'storeUndercategory']);
+        Route::put('/category/{category}/undercategory/{undercategory}/associate',[CategoryController::class, 'attachUndercategory']);
         Route::delete('categories/{category}/delete',[CategoryController::class, 'deleteCategory']);
         Route::delete('undercategories/{undercategory}/delete',[CategoryController::class, 'deleteUndercategory']);
 

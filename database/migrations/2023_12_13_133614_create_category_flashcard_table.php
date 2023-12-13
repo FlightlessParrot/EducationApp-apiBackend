@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Category;
+use App\Models\Flashcard;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,9 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('subscriptions',function (Blueprint $table)
-        {
-            $table->string('path')->nullable();
+        Schema::create('category_flashcard', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+            $table->foreignIdFor(Flashcard::class);
+            $table->foreignIdFor(Category::class);
         });
     }
 
@@ -22,9 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('subscriptions',function (Blueprint $table)
-        {
-            $table->dropColumn('path');
-        });
+        Schema::dropIfExists('category_flashcard');
     }
 };

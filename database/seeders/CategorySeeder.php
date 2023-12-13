@@ -18,25 +18,17 @@ class CategorySeeder extends Seeder
         for($i=0;$i<=2;$i++)
         {
         $category=Category::factory()->create();
+        $undercategory=Undercategory::factory()->create();
+        $undercategory->category()->associate($category);
+        $undercategory->save();
         $questions=Question::inRandomOrder()->limit(20)->get();
         
         foreach ($questions as $question)
         {
            
             $question->categories()->attach($category);
+            $question->undercategories()->attach($undercategory);
            
-        }
-        }
-    
-    for($i=0;$i<=2;$i++)
-        {
-       $undercategory=Undercategory::factory()->create();
-        
-        $questions=Question::has('categories')->inRandomOrder()->limit(20)->get();
-        foreach ($questions as $question)
-        {
-        $question->undercategories()->attach($undercategory);
-     
         }
         }
         }

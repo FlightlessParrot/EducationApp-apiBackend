@@ -15,12 +15,14 @@ class CategoryController extends Controller
     public function showCategoriesForTest(Test $test): Response
     {
        
-        $questions=$test->questions()->whereNotNull('category_id')->get();
+        $questions=$test->questions()->get();
         $categories=new Collection([]);
         foreach ($questions as $question)
         {
-      
-            $categories->push($question->category()->first());
+            foreach ($question->categories as $category)
+            {
+            $categories->push($category);
+            }
             $categories=$categories->unique();
         }
 
@@ -29,11 +31,14 @@ class CategoryController extends Controller
     public function showUnderCategoriesForTest(Test $test):Response
     {
 
-        $questions=$test->questions()->whereNotNull('undercategory_id')->get();
+        $questions=$test->questions()->get();
         $undercategories=new Collection([]);
         foreach ($questions as $question)
         {
-            $undercategories->push($question->undercategory()->first());
+            foreach($question->undercategories as $undercategory)
+            {
+                $undercategories->push($undercategory);
+            }
             $undercategories=$undercategories->unique();
         }
 
@@ -88,14 +93,26 @@ class CategoryController extends Controller
 
     public function storeUndercategory(Request $request)
     {
-        $request->validate(['name'=>'required|max:250|unique:categories']);
+        $request->validate(['name'=>'required|max:250|unique:categories','category'=>'required|Numeric']);
+
+        $category=Category::find($request->category);
         $undercategory=Undercategory::create(['name'=>$request->name]);
+        $undercategory->category()->associate($category);
+        return response(['undercategory'=>$undercategory]);
+    }
+
+    public function attachUndercategory(Category $category, Undercategory $undercategory)
+    {
+        $undercategory=$undercategory->category()->associate($category);
+        
         return response(['undercategory'=>$undercategory]);
     }
 
     public function deleteCategory(Category $category)
     {
-
+        foreach($category->undercategories as $undercategory){
+            $undercategory->delete();
+        }
         $category->delete();
         return response(['category'=>$category]);
     }

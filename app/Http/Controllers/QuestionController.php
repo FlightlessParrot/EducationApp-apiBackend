@@ -123,7 +123,7 @@ class QuestionController extends Controller
         $undercategories=$request->input('undercategories');
         $questionsByCategories=new Collection();
         $questionsByUndercategories=new Collection();
-        if($categories){
+        if($categories && !$undercategories){
             foreach($categories as $categoryId)
             {
                 $category=Category::find($categoryId);

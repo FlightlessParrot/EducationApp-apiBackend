@@ -20,8 +20,13 @@ class Category extends Model
         return $this->belongsToMany(Question::class);
     }
 
-    function flashcards() : HasMany
+    function flashcards() : BelongsToMany
     {
-        return $this->hasMany(Flashcard::class);
+        return $this->belongsToMany(Flashcard::class);
+    }
+
+    function undercategories() : HasMany
+    {
+        return $this->hasMany(Undercategory::class);
     }
 }

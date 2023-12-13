@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,9 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('subscriptions',function (Blueprint $table)
+        Schema::table('undercategories',function (Blueprint $table)
         {
-            $table->string('path')->nullable();
+            $table->foreignIdFor(Category::class)->nullable();
         });
     }
 
@@ -22,9 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('subscriptions',function (Blueprint $table)
+        Schema::table('undercategories',function (Blueprint $table)
         {
-            $table->dropColumn('path');
+            $table->dropColumn('category_id');
         });
     }
 };

@@ -23,12 +23,14 @@ class FlashcardsSeeder extends Seeder
         $flashcards=Flashcard::factory()->count(10)->make();
         $category=Category::factory()->create();
         $undercategory=Undercategory::factory()->create();
+        $undercategory->category()->associate($category);
+        $undercategory->save();
         foreach($flashcards as $flashcard)
         {
         $subscription->flashcards()->save($flashcard);
-        $flashcard->category()->associate($category);
-        $flashcard->undercategory()->associate($undercategory);
-        $flashcard->save();
+        $flashcard->categories()->attach($category);
+        $flashcard->undercategories()->attach($undercategory);
+     
         }
     }
     }

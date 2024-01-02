@@ -95,9 +95,10 @@ class CategoryController extends Controller
     {
         $request->validate(['name'=>'required|max:250|unique:categories','category'=>'required|Numeric']);
 
-        $category=Category::find($request->category);
+        $category=Category::findOrFail($request->category);
         $undercategory=Undercategory::create(['name'=>$request->name]);
         $undercategory->category()->associate($category);
+        $undercategory->save();
         return response(['undercategory'=>$undercategory]);
     }
 

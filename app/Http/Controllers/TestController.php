@@ -144,7 +144,7 @@ class TestController extends Controller
            {
             Storage::delete(str_replace('/storage','public',$test->path));
            }
-           $test->path=$path;
+           $test->path=Storage::url($path);
            $test->save();
    
            return response(['image'=>$test->path]);

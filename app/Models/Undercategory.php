@@ -12,7 +12,7 @@ class Undercategory extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'name', 'category_id'
+        'name'
     ];
 
     function questions() : BelongsToMany
@@ -23,8 +23,8 @@ class Undercategory extends Model
     {
         return $this->belongsToMany(Flashcard::class);
     }
-    function category():BelongsTo
+    function categories():BelongsToMany
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsToMany(Category::class);
     }
 }

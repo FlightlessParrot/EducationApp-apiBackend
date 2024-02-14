@@ -25,8 +25,8 @@ class Category extends Model
         return $this->belongsToMany(Flashcard::class);
     }
 
-    function undercategories() : HasMany
+    function undercategories() : BelongsToMany
     {
-        return $this->hasMany(Undercategory::class);
+        return $this->belongsToMany(Undercategory::class);
     }
 }

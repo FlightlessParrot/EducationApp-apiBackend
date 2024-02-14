@@ -6,7 +6,6 @@ use App\Models\Category;
 use App\Models\Flashcard;
 use App\Models\Undercategory;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class FlashcardsSeeder extends Seeder
@@ -23,14 +22,14 @@ class FlashcardsSeeder extends Seeder
         $flashcards=Flashcard::factory()->count(10)->make();
         $category=Category::factory()->create();
         $undercategory=Undercategory::factory()->create();
-        $undercategory->category()->associate($category);
+        $undercategory->categories()->attach($category);
         $undercategory->save();
+
         foreach($flashcards as $flashcard)
         {
         $subscription->flashcards()->save($flashcard);
         $flashcard->categories()->attach($category);
         $flashcard->undercategories()->attach($undercategory);
-     
         }
     }
     }

@@ -12,7 +12,7 @@ class Flashcard extends Model
     use HasFactory;
 
     protected $fillable=[
-        'question','answer','path',
+        'question','answer','path', 
     ];
 
     public function subscriptions():MorphToMany

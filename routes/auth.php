@@ -110,6 +110,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/subscriptions',[SubscriptionController::class, 'index']);
 
     Route::get('categories/all/undercategories/all',[CategoryController::class, 'showAllCategoriesAndUndercategories']); 
+    Route::get('category/{category}',[CategoryController::class, 'showCategory']);
+    Route::get('undercategory/{undercategory}',[CategoryController::class, 'showUndercategory']);
     Route::get('subscription/{subscription}',[SubscriptionController::class,'show']);
     Route::get('/code/{code}',[DiscountCodeController::class,'verify']);
     Route::post('/payments/subscription/{subscription}',[PaymentController::class,'makePayment']); 
@@ -143,9 +145,6 @@ Route::middleware(['auth','teamleader'])->group(function()
     Route::put('open-answers/{openAnswer}/grade',[OpenAnswerController::class, 'giveGrade']);
     Route::get('egzams/{test}/open-question',[OpenAnswerController::class, 'index']);
 
-
-   
-    
 });
 
 Route::middleware(['auth','admin'])->group(
@@ -192,6 +191,8 @@ Route::middleware(['auth','admin'])->group(
         Route::put('/category/{category}/undercategory/{undercategory}/associate',[CategoryController::class, 'attachUndercategory']);
         Route::delete('categories/{category}/delete',[CategoryController::class, 'deleteCategory']);
         Route::delete('undercategories/{undercategory}/delete',[CategoryController::class, 'deleteUndercategory']);
+        Route::post('category/{category}',[CategoryController::class,'editCategory']);
+        Route::post('undercategory/{undercategory}',[CategoryController::class, 'editUndercategory']);
 
         Route::post('/flashcard/new',[FlashcardController::class,'store']);
         Route::put('flashcards/{flashcard}/image/update',[FlashcardController::class,'addImage']);

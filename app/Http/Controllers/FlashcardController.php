@@ -44,6 +44,19 @@ class FlashcardController extends Controller
                 $undercategory = Undercategory::find($undercategoryId);
                 $undercategoriesFalshcards = $undercategory->flashcards()->get();
                 $chosenFlashcards = $chosenFlashcards->merge($undercategoriesFalshcards);
+                // $isCategoryCorrect = false;
+                // foreach ($undercategoriesFalshcards as $flashcard) {
+                //     $relatedCategories = $flashcard->categories()->get();
+                //     foreach ($relatedCategories as $category) {
+                //         if (in_array($category->id, $categories)) {
+                //             $isCategoryCorrect = true;
+                //         }
+                //     }
+
+                //     if ($isCategoryCorrect) {
+                //         $chosenFlashcards = $chosenFlashcards->push($flashcard);
+                //     }
+                // }
             }
         }
 

@@ -61,12 +61,14 @@ class CategoryController extends Controller
         $undercategories=new Collection();
         foreach($flashcards as $flashcard)
         {
-            $categories=$flashcard->categories()->get();
-            $categories->push(...$categories);
+            $flashcardCategories=$flashcard->categories()->get();
+            $categories->push(...$flashcardCategories);
             
-            $undercategories=$flashcard->undercategories()->get();
-            foreach($undercategories as $undercategory)
+            $flashcardUndercategories=$flashcard->undercategories()->get();
+            
+            foreach($flashcardUndercategories as $undercategory)
             {
+                
                 $undercategory->categories=$undercategory->categories()->get();
                 $undercategories->push($undercategory);
             }
